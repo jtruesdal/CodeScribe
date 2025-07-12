@@ -8,31 +8,33 @@ from code_scribe import lib
 def extract_fortran_info(filepath):
     """Extracts module and subroutine/function names from a Fortran file."""
     info = {"modules": [], "subroutines": [], "functions": []}
-
-    with open(filepath, "r") as file:
-        for line in file:
-            line = line.strip()
-            line = line.lower()
-            # Check for module declaration
-            if line.startswith("module "):
-                info["modules"].append(line.split()[1])  # Capture module name
-            # Check for subroutine declaration
-            elif line.startswith("subroutine "):
-                # Extract the subroutine name (first word after "subroutine")
-                match = re.match(r"subroutine\s+(\w+)", line)
-                if match:
-                    info["subroutines"].append(
-                        match.group(1)
-                    )  # Capture subroutine name
-            # Check for function declaration
-            elif line.startswith("function "):
-                # Extract the function name (first word after "function")
-                match = re.match(r"function\s+(\w+)", line)
-                if match:
-                    info["functions"].append(match.group(1))  # Capture function name
-
+    try:
+        with open(filepath, "r", encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                line = line.lower()
+                # Check for module declaration
+                if line.startswith("module "):
+                    info["modules"].append(line.split()[1])  # Capture module name
+                    # Check for subroutine declaration
+                elif line.startswith("subroutine "):
+                    # Extract the subroutine name (first word after "subroutine")
+                    match = re.match(r"subroutine\s+(\w+)", line)
+                    if match:
+                        info["subroutines"].append(
+                            match.group(1)
+                        )  # Capture subroutine name
+                        # Check for function declaration
+                    elif line.startswith("function "):
+                        # Extract the function name (first word after "function")
+                        match = re.match(r"function\s+(\w+)", line)
+                        if match:
+                            info["functions"].append(match.group(1))  # Capture function name
+                pass
+    except UnicodeDecodeError as e:
+        print(f"UnicodeDecodeError in file: {filepath}")
+        raise        
     return info
-
 
 def create_scribe_yaml(root_directory):
     """Traverses the directory and creates scribe.yaml files for Fortran files."""
